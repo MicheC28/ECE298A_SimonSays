@@ -1,40 +1,57 @@
-# SPDX-FileCopyrightText: © 2024 Tiny Tapeout
-# SPDX-License-Identifier: Apache-2.0
-
 import cocotb
+from cocotb.triggers import RisingEdge, Timer
 from cocotb.clock import Clock
-from cocotb.triggers import ClockCycles
-
+import csv
+import os
 
 @cocotb.test()
-async def test_project(dut):
-    dut._log.info("Start")
+async def test_idle_state_from_csv(dut):
+    """Test the IDLE_STATE logic with LFSR output values loaded from CSV."""
 
-    # Set the clock period to 10 us (100 KHz)
-    clock = Clock(dut.clk, 10, units="us")
-    cocotb.start_soon(clock.start())
+    # Start 10ns clock
+    cocotb.start_soon(Clock(dut.clk, 10, units="ns").start())
 
-    # Reset
-    dut._log.info("Reset")
-    dut.ena.value = 1
+    # Reset DUT
+    dut.rst_n.value = 0
     dut.ui_in.value = 0
     dut.uio_in.value = 0
-    dut.rst_n.value = 0
-    await ClockCycles(dut.clk, 10)
+    dut.ena.value = 1
+    await RisingEdge(dut.clk)
+    await RisingEdge(dut.clk)
     dut.rst_n.value = 1
+    await RisingEdge(dut.clk)
 
-    dut._log.info("Test project behavior")
+    # Read CSV file from same directory
+    csv_file = os.path.join(os.path.dirname(__file__), "lfsr_outputs.csv")
+    with open(csv_file, newline='') as f:
+        reader = csv.DictReader(f)
+        for row_num, row in enumerate(reader):
+            for i in range(1, 5):  # LFSR_OUT_1 to LFSR_OUT_4
+                lfsr_bin_str = row[f"LFSR_OUT_{i}"]
+                lfsr_val = int(lfsr_bin_str, 2)
 
-    # Set the input values you want to test
-    dut.ui_in.value = 20
-    dut.uio_in.value = 30
+                # Set ui_in: en_IDLE=1, rst_IDLE=0, complete_LFSR=1
+                dut.ui_in.value = 0b00000101
+                dut.uio_in.value = lfsr_val
 
-    # Wait for one clock cycle to see the output values
-    await ClockCycles(dut.clk, 1)
+                # Wait a few clock cycles
+                for _ in range(5):
+                    await RisingEdge(dut.clk)
 
-    # The following assersion is just an example of how to check the output values.
-    # Change it to match the actual expected output of your module:
-    assert dut.uo_out.value == 50
+                # Extract results
+                mem_in = dut.uo_out.value.integer
+                out_flags = dut.uio_out.value.integer
+                mem_load = (out_flags >> 3) & 0x1
+                complete_idle = (out_flags >> 2) & 0x1
+                mem_load_val = out_flags & 0x3
 
-    # Keep testing the module by changing the input values, waiting for
-    # one or more clock cycles, and asserting the expected output values.
+                dut._log.info(f"Row {row_num}, Vec {i}: LFSR={lfsr_bin_str}, MEM_IN={mem_in:08b}, MEM_LOAD={mem_load}, COMPLETE_IDLE={complete_idle}, MEM_LOAD_VAL={mem_load_val}")
+
+                assert mem_in == lfsr_val, f"MEM_IN mismatch: expected {lfsr_val:08b}, got {mem_in:08b}"
+
+    # Let IDLE finish after 4 values
+    for _ in range(10):
+        await RisingEdge(dut.clk)
+
+    final_flags = dut.uio_out.value.integer
+    assert (final_flags >> 2) & 0x1 == 1, "complete_IDLE not set after 4 loads"
