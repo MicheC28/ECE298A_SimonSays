@@ -1,40 +1,71 @@
-# SPDX-FileCopyrightText: © 2024 Tiny Tapeout
-# SPDX-License-Identifier: Apache-2.0
-
 import cocotb
 from cocotb.clock import Clock
-from cocotb.triggers import ClockCycles
-
+from cocotb.triggers import RisingEdge, Timer
+import pandas as pd
 
 @cocotb.test()
-async def test_project(dut):
-    dut._log.info("Start")
+async def test_mem_from_csv(dut):
+    """
+    Test MEM module loads using vectors from CSV:
+    Columns: LFSR_OUT_1,LFSR_OUT_2,LFSR_OUT_3,LFSR_OUT_4,
+             LOAD_VAL_1,LOAD_VAL_2,LOAD_VAL_3,LOAD_VAL_4,MEM_OUT
+    """
 
-    # Set the clock period to 10 us (100 KHz)
-    clock = Clock(dut.clk, 10, units="us")
-    cocotb.start_soon(clock.start())
+    # Start clock
+    cocotb.fork(Clock(dut.clk, 10, units="ns").start())
 
-    # Reset
-    dut._log.info("Reset")
-    dut.ena.value = 1
-    dut.ui_in.value = 0
-    dut.uio_in.value = 0
-    dut.rst_n.value = 0
-    await ClockCycles(dut.clk, 10)
-    dut.rst_n.value = 1
+    # Apply reset
+    dut.rst_n <= 0
+    await RisingEdge(dut.clk)
+    await RisingEdge(dut.clk)
+    dut.rst_n <= 1
+    await RisingEdge(dut.clk)
 
-    dut._log.info("Test project behavior")
+    # Load CSV test vectors
+    df = pd.read_csv("mem_test_vectors.csv")
 
-    # Set the input values you want to test
-    dut.ui_in.value = 20
-    dut.uio_in.value = 30
+    for idx, row in df.iterrows():
+        # Reset before each vector test
+        dut.rst_n <= 0
+        await RisingEdge(dut.clk)
+        dut.rst_n <= 1
+        await RisingEdge(dut.clk)
 
-    # Wait for one clock cycle to see the output values
-    await ClockCycles(dut.clk, 1)
+        mem_out_expected = int(row["MEM_OUT"], 2)
 
-    # The following assersion is just an example of how to check the output values.
-    # Change it to match the actual expected output of your module:
-    assert dut.uo_out.value == 50
+        # We will apply 4 sequential loads, one per clock cycle
+        for i in range(1, 5):
+            # Set MEM_LOAD high for one cycle
+            dut.ui_in[0] <= 1  # MEM_LOAD bit
+            # Set MEM_IN 8-bit value
+            lfsr_out = row[f"LFSR_OUT_{i}"]
+            dut.uio_in <= int(lfsr_out, 2)
 
-    # Keep testing the module by changing the input values, waiting for
-    # one or more clock cycles, and asserting the expected output values.
+            # Set MEM_LOAD_VAL 2-bit selector
+            load_val = row[f"LOAD_VAL_{i}"]
+            # ui_in[2:1] hold MEM_LOAD_VAL bits
+            # To set bits 1 and 2, combine carefully:
+            # Clear bits 1,2 then set
+            current_ui_in = dut.ui_in.value.integer
+            # Clear bits 1 and 2:
+            current_ui_in &= ~(0b110)
+            # Set new load_val shifted to bits 1 and 2
+            current_ui_in |= (int(load_val, 2) << 1)
+            dut.ui_in <= current_ui_in
+
+            # Wait one clock cycle with MEM_LOAD asserted
+            await RisingEdge(dut.clk)
+
+            # De-assert MEM_LOAD for next cycle (except last)
+            if i != 4:
+                dut.ui_in[0] <= 0
+                await RisingEdge(dut.clk)
+
+        # After all 4 loads, MEM_OUT should match expected
+        mem_out_actual = dut.MEM_OUT.value.integer
+
+        assert mem_out_actual == mem_out_expected, (
+            f"Test vector {idx}: MEM_OUT mismatch\n"
+            f"Expected: {row['MEM_OUT']} ({mem_out_expected:#010x})\n"
+            f"Actual:   {mem_out_actual:032b} ({mem_out_actual:#010x})"
+        )
