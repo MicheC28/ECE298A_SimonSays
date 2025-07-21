@@ -22,6 +22,12 @@ project:
     - "idle_state.v"
     - "32b_Reg_Mem.v"
     - "wait_state.v"
+    - "check_state.v"
+    - "display_state.v"
+    - "sequence_mem.v"
+    - "colour_encoder.v"
+    - "colour_decoder.v"
+    - "start_reg.v"
 
 # The pinout of your project. Leave unused pins blank. DO NOT delete or add any pins.
 # This section is for the datasheet/website. Use descriptive names (e.g., RX, TX, MOSI, SCL, SEG_A, etc.).

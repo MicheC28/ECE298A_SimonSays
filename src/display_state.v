@@ -19,7 +19,8 @@ module display_state (
         if (rst_display) begin
             pos              <= 4'd0;
             active           <= 1'b0;
-            colour_bus       <= 2'bzz;   // Hi-Z inside, OE=0 outside
+            // colour_bus       <= 2'bzz;   // Hi-Z inside, OE=0 outside
+            colour_bus       <= 2'b00;
             colour_oe        <= 1'b0;
             complete_display <= 1'b0;
         end
@@ -34,7 +35,7 @@ module display_state (
 
             // ---------- active colour streaming ------------------
             if (active) begin
-                colour_bus <= seq_in_display[(pos << 1) +: 2];
+                colour_bus <= seq_in_display[{1'b0, pos} +: 2];
                 colour_oe  <= 1'b1;      // drive bus
 
                 if (pos == round_ctr) begin
@@ -47,7 +48,7 @@ module display_state (
             end
             else begin
                 // ---------- idle state ---------------------------
-                colour_bus <= 2'bzz;      // internal Hi-Z
+                // colour_bus <= 2'bzz;      // internal Hi-Z
                 colour_oe  <= 1'b0;       // inform wrapper to tri-state pads
             end
         end

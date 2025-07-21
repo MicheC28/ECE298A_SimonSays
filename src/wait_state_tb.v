@@ -20,7 +20,7 @@ module wait_state_tb;
         .colour_val(colour_val),
         .sequence_len(sequence_len),
         .complete_wait(complete_wait),
-        .sequence(sequence)
+        .sequence_val(sequence)
     );
 
     // Clock generation

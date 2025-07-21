@@ -1,4 +1,4 @@
- module WAIT_STATE (
+module WAIT_STATE (
     input  wire        clk,
     input  wire        rst,
     input  wire        en,
@@ -14,12 +14,12 @@
     always @(posedge clk) begin
         if (rst) begin
             count         <= 4'b0;
-            sequence_val      <= 32'b0;
+            sequence_val  <= 32'b0;
             complete_wait <= 1'b0;
         end else if (en && colour_in && !complete_wait) begin
-            // Add the new colour_val to the sequence at the correct position
-            sequence_val <= (sequence_val <<  2)| (colour_val);
-            count    <= count + 1'b1;
+            // Store colour_val into bits [count*2 +: 2]
+            sequence_val[count*2 +: 2] <= colour_val;
+            count <= count + 1'b1;
             if (count + 1'b1 == sequence_len)
                 complete_wait <= 1'b1;
         end
