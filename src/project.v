@@ -15,7 +15,7 @@ module tt_um_simonsays (
   // Local Signals
 
     //Input
-    wire reset = ui_in[4];                             
+    wire reset = ~rst_n | ui_in[4];                             
 
     //Start Reg
     wire start = ui_in[5]; 
@@ -87,7 +87,7 @@ module tt_um_simonsays (
 
     // Assignments
     // START
-    assign rst_START_REG = game_complete | reset;
+    assign rst_START_REG = ~rst_n;
 
     //IDLE
     assign en_IDLE = START_REG_OUT & ~complete_IDLE;
@@ -115,13 +115,14 @@ module tt_um_simonsays (
 
     // counter
     assign counter_load = complete_CHECK; // dc this logic
-    assign rst_counter = game_complete;
+    assign rst_counter = reset | game_complete;
     
-    start_reg START(
-        .clk(clk),
-        .rst(rst_START_REG),
-        .start(start),
-        .out(START_REG_OUT)
+    start_reg START (
+        .clk   (clk),
+        .rst   (reset),       
+        .start (start),
+        .done  (game_complete),
+        .out   (START_REG_OUT)
     );
 
     colour_decoder decoder(
@@ -157,14 +158,31 @@ module tt_um_simonsays (
         .MEM_LOAD_VAL(MEM_LOAD_VAL)
     );
 
-    MEM mem(
+    `ifdef COCOTB_SIM
+        reg        tb_mem_load = 1'b0;
+        reg [31:0] tb_mem_data = 32'd0;
+    `endif
+
+    MEM mem (
         .clk(clk),
         .MEM_LOAD(MEM_LOAD),
         .MEM_IN(MEM_IN),
         .rst_MEM(rst_MEM),
         .MEM_LOAD_VAL(MEM_LOAD_VAL),
-        .MEM_OUT(MEM_OUT)
+        .MEM_OUT(MEM_OUT),
+
+        // -------- test‑bench only ----------
+        .test_load(`ifdef COCOTB_SIM tb_mem_load `else 1'b0 `endif),
+        .test_data(`ifdef COCOTB_SIM tb_mem_data `else 32'd0 `endif)
     );
+    // MEM mem(
+    //     .clk(clk),
+    //     .MEM_LOAD(MEM_LOAD),
+    //     .MEM_IN(MEM_IN),
+    //     .rst_MEM(rst_MEM),
+    //     .MEM_LOAD_VAL(MEM_LOAD_VAL),
+    //     .MEM_OUT(MEM_OUT)
+    // );
 
     WAIT_STATE wait_state(
         .clk(clk),

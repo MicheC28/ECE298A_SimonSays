@@ -6,12 +6,15 @@ module SEQUENCE_MEM (
     output reg  [3:0] data_out     // Always reflects current count value
 );
 
-    always @(posedge clk) begin
-        if (rst)
-            data_out <= 4'b0000;
-        else if (load)
-            data_out <= data_in;
-       
+always @(posedge clk) begin
+    // --- synchronous reset ---
+    if (rst) begin
+        data_out <= 4'd0;      // counter starts at 0 after power‑on
     end
+    // --- normal load on successful round ---
+    else if (load) begin
+        data_out <= data_in;   // next round value from check_state
+    end
+end
 
 endmodule
