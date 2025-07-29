@@ -237,8 +237,29 @@ module tt_um_simonsays (
     // DISPLAY: 01
     // WAIT: 10
     // CHECK: 11
-    assign uo_out[4] = en_DISPLAY | en_CHECK;
-    assign uo_out[5] = en_WAIT | en_CHECK; 
+    // assign uo_out[4] = en_DISPLAY | en_CHECK;
+    reg uo4_ff;
+    always @(posedge clk) begin
+        if (reset)
+            uo4_ff <= 1'b0;
+        else
+            uo4_ff <= en_DISPLAY | en_CHECK;
+    end
+
+    assign uo_out[4] = uo4_ff;
+
+
+    // assign uo_out[5] = en_WAIT | en_CHECK; 
+    reg uo5_ff;
+    always @(posedge clk) begin
+        if (reset)
+            uo5_ff <= 1'b0;
+        else
+            uo5_ff <=  en_WAIT | en_CHECK;
+    end
+
+    assign uo_out[5] = uo5_ff;
+
     
     // drive unused ports
     assign uio_out = 8'b0;

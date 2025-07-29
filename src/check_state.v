@@ -64,9 +64,8 @@ module check_state (
                     rst_idle      <= 1'b1;
                     rst_check_out <= 1'b1;  // self-reset (optional)
 
-                    // Signal overall game completion on last round
-                    if (round_ctr_in == 4'd15)
-                        game_complete <= 1'b1;
+                    // Set Game Complete 
+                    game_complete <= 1'b1;
                 end
                 else begin
                     // === FAILURE / WRONG SEQUENCE ===========================
