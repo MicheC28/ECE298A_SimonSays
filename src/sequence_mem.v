@@ -9,11 +9,11 @@ module SEQUENCE_MEM (
 always @(posedge clk) begin
     // --- synchronous reset ---
     if (rst) begin
-        data_out <= 4'd0;      // counter starts at 0 after power‑on
+        data_out <= 4'b1110;      // counter starts at 0 after power‑on
     end
     // --- normal load on successful round ---
     else if (load) begin
-        data_out <= data_in;   // next round value from check_state
+        // data_out <= data_in;   // next round value from check_state
     end
 end
 

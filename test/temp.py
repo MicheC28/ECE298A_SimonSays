@@ -2,7 +2,7 @@
 # test_simon.py – round‑0 debug test for tt_um_simonsays
 # ---------------------------------------------------------------------------
 import cocotb
-from cocotb.triggers import RisingEdge, Timer, ClockCycles
+from cocotb.triggers import RisingEdge, FallingEdge, Timer, ClockCycles
 
 CLK_HALF = 50          # 50 ns  → 10 MHz
 MAX_CYC  = 50_000      # 5 ms at 10 MHz
@@ -53,9 +53,11 @@ async def simon_system_test(dut):
     dut.ui_in.value = 0
 
     # ------------------- staged waits --------------------------------------
-    await wait_assert(dut,
-                      lambda: dut.complete_IDLE.value == 1,
-                      "complete_IDLE == 1")
+    # await wait_assert(dut,
+    #                   lambda: dut.complete_IDLE.value == 1,
+    #                   "complete_IDLE == 1")
+    await RisingEdge(dut.complete_IDLE == 1)
+    await FallingEdge(dut.complete_IDLE == 1)
 
     await wait_assert(dut,
                       lambda: dut.display_state.colour_oe.value == 1,

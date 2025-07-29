@@ -2,7 +2,7 @@
 # test_simon.py  –  smoke‑test + CSV‑driven PASS/FAIL vectors
 # ---------------------------------------------------------------------------
 import os, pathlib, cocotb
-from cocotb.triggers import Timer, RisingEdge, ClockCycles
+from cocotb.triggers import Timer, RisingEdge, FallingEdge, ClockCycles, with_timeout
 from cocotb.result   import TestFailure
 
 CLK_HALF = 50            # 50 ns → 10 MHz
@@ -12,6 +12,8 @@ MAX_WAIT = 50_000        # 5 ms guard‑time per wait_for()
 MEM_DATA_SIG = "mem.test_data"     # 32‑bit word to poke
 MEM_LOAD_SIG = "mem.test_load"     # 1‑cycle load strobe
 MEM_VAL_SIG  = "mem.MEM_LOAD_VAL"  # 2‑bit byte‑enable (write mask)
+
+seeds = [0x5A, 0x4B, 0x3C, 0x2D]
 
 # ───────── helpers ────────────────────────────────────────────────────────
 @cocotb.coroutine
@@ -55,28 +57,6 @@ async def simon_system_test(dut):
     cocotb.start_soon(clock_gen(dut.clk))
 
     # 1 ───────── smoke‑test ───────────────────────────────────────────────
-    dut.ena .value = 1
-    dut.rst_n.value = 0
-    dut.uio_in.value = 0x5A
-    await ClockCycles(dut.clk, 3)
-    dut.rst_n.value = 1
-    await RisingEdge(dut.clk)
-
-    dut.ui_in.value = 0b0010_0000          # START
-    await ClockCycles(dut.clk, 4)
-    dut.ui_in.value = 0
-
-    await wait_for(dut, lambda: dut.display_state.colour_oe.value == 1,
-                   "colour_oe (smoke)")
-    await wait_for(dut, lambda: resolved(dut.display_state.colour_bus),
-                   "colour_bus resolved (smoke)")
-
-    smoke = []
-    while dut.display_state.colour_oe.value == 1:
-        smoke.append(int(dut.display_state.colour_bus.value) & 0b11)
-        await RisingEdge(dut.clk)
-    dut._log.info(f"Smoke‑test colours: {smoke}")
-    assert smoke, "Smoke‑test saw no colours"
 
     # 2 ───────── CSV‑driven vectors ───────────────────────────────────────
     mem_data = dut._id(MEM_DATA_SIG, False)
@@ -88,6 +68,30 @@ async def simon_system_test(dut):
         raise TestFailure("vectors.csv is empty or missing")
 
     for idx, line in enumerate(vecs, start=1):
+        dut.ena .value = 1
+        dut.rst_n.value = 0
+        dut.uio_in.value = seeds[idx-1]
+        await ClockCycles(dut.clk, 3)
+        dut.rst_n.value = 1
+        await RisingEdge(dut.clk)
+
+        dut.ui_in.value = 0b0010_0000          # START
+        await ClockCycles(dut.clk, 4)
+        dut.ui_in.value = 0
+
+        await wait_for(dut, lambda: dut.display_state.colour_oe.value == 1,
+                    "colour_oe (smoke)")
+        await wait_for(dut, lambda: resolved(dut.display_state.colour_bus),
+                    "colour_bus resolved (smoke)")
+
+        smoke = []
+        while dut.display_state.colour_oe.value == 1:
+            smoke.append(int(dut.display_state.colour_bus.value) & 0b11)
+            await RisingEdge(dut.clk)
+        dut._log.info(f"Smoke‑test colours: {smoke}")
+        assert smoke, "Smoke‑test saw no colours"
+
+
         mem_hex, play_hex, expect = [f.strip().lower() for f in line.split(",")]
         mem_word   = int(mem_hex, 16)
         player_pat = int(play_hex, 16)
@@ -100,6 +104,9 @@ async def simon_system_test(dut):
         dut.rst_n.value = 0
         await ClockCycles(dut.clk, 3)
         dut.rst_n.value = 1
+
+
+        
         await RisingEdge(dut.clk)
 
         dut.ui_in.value = 0b0010_0000
@@ -107,8 +114,12 @@ async def simon_system_test(dut):
         dut.ui_in.value = 0
 
         # ─── wait IDLE done, then load memory word ────────────────────────
-        await wait_for(dut, lambda: dut.complete_IDLE.value == 1,
-                       "complete_IDLE")
+        # await wait_for(dut, lambda: dut.complete_IDLE.value == 1,
+        #                "complete_IDLE")
+        await with_timeout(RisingEdge(dut.complete_IDLE), timeout_time=5, timeout_unit='ms')
+        cocotb.log.info("[ASSERT] rising edge complete_idle detected")
+        
+        # await FallingEdge(dut.complete_IDLE)
 
         mem_data.value = mem_word          # data on bus
         await RisingEdge(dut.clk)          # FIX ①: give bus a stable cycle
@@ -128,16 +139,20 @@ async def simon_system_test(dut):
 
         # ─── replay player sequence during WAIT state ─────────────────────
         ui_state = 0
-        for i in range((player_pat.bit_length() + 1) // 2):
+        for i in range(14):
             col = (player_pat >> (2 * i)) & 0b11
             ui_state = await press_colour(dut, col, ui_state)
 
         # ─── wait complete_wait then complete_check ───────────────────────
-        await wait_for(dut, lambda: dut.complete_WAIT.value == 1,
-                       "complete_WAIT")        # FIX ③
-        await wait_for(dut, lambda: dut.check_state.complete_check.value == 1,
-                       "complete_check")
-
+        # await wait_for(dut, lambda: dut.complete_WAIT.value == 1,
+        #                "complete_WAIT")        # FIX ③
+        await with_timeout(RisingEdge(dut.complete_WAIT), timeout_time=5, timeout_unit='ms')
+        cocotb.log.info("[ASSERT] rising edge complete_wait detected")
+        # await wait_for(dut, lambda: dut.check_state.complete_check.value == 1,
+        #                "complete_check")
+        await with_timeout(RisingEdge(dut.complete_CHECK), timeout_time=5, timeout_unit='ms')
+        cocotb.log.info("[ASSERT] rising edge complete_check detected")
+        
         got_pass = bool(dut.check_state.sequences_match.value)
         assert got_pass == want_pass, (
             f"Vector {idx} FAILED: expected "

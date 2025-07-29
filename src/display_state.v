@@ -25,7 +25,7 @@ module display_state (
             complete_display <= 1'b0;
         end
         else begin
-            complete_display <= 1'b0;    // default (1-cycle pulse)
+            // complete_display <= 1'b0;    // default (1-cycle pulse)
 
             // ---------- start of a new round ----------------------
             if (en_display && !active) begin
