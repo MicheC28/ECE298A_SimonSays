@@ -22,7 +22,7 @@ always @(posedge clk) begin
         count <= 2'b00;
     end else if (en_IDLE) begin
         if (complete_LFSR && ~MEM_LOAD) begin
-            en_LFSR <= 1'b0;
+            en_LFSR <= 1'b1;
             MEM_IN <= LFSR_output;
             MEM_LOAD_VAL <= count;
             MEM_LOAD <= 1'b1;
@@ -30,15 +30,21 @@ always @(posedge clk) begin
             en_LFSR <= 1'b1;
             MEM_LOAD <= 1'b0;
 
-            if (count == 2'b00) count <= 2'b01;
-            else if (count == 2'b01) count <= 2'b10;
-            else if (count == 2'b10) count <= 2'b11;
-            else if (count == 2'b11) begin
+            if (count == 2'b00) begin
+                count <= 2'b01;
+                en_LFSR <= 1'b0;
+            end else if (count == 2'b01) begin 
+                count <= 2'b10;
+                en_LFSR <= 1'b0;
+            end else if (count == 2'b10) begin
+                count <= 2'b11;
+                en_LFSR <= 1'b0;
+            end else if (count == 2'b11) begin
                 complete_IDLE <= 1'b1;
                 count <= 2'b00;
             end else begin
                 complete_IDLE <= 1'b0;
-            end // <- missing END added here!
+            end 
         end else begin
             en_LFSR <= 1'b1;
         end

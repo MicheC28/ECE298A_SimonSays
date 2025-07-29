@@ -16,8 +16,8 @@ module MEM (
             MEM_OUT <= 32'd0;
 
         // test‑bench write has higher priority
-        else if (test_load)
-            MEM_OUT <= test_data;
+        // else if (test_load)
+            // MEM_OUT <= test_data;
 
         else if (MEM_LOAD) begin
             case (MEM_LOAD_VAL)
