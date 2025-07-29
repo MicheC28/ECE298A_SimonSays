@@ -72,11 +72,9 @@ module check_state (
                     round_ctr_out <= 4'd0;   // back to round 0
                     game_complete <= 1'b0;   // ensure not set
                     complete_check <= 1'b1;
-                    // (no resets asserted; FSM may show "Game Over" state)
                 end
             end
             else begin
-                // hold current round counter otherwise
                 round_ctr_out <= round_ctr_in;
             end
         end

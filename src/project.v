@@ -175,14 +175,6 @@ module tt_um_simonsays (
         .test_load(`ifdef COCOTB_SIM tb_mem_load `else 1'b0 `endif),
         .test_data(`ifdef COCOTB_SIM tb_mem_data `else 32'd0 `endif)
     );
-    // MEM mem(
-    //     .clk(clk),
-    //     .MEM_LOAD(MEM_LOAD),
-    //     .MEM_IN(MEM_IN),
-    //     .rst_MEM(rst_MEM),
-    //     .MEM_LOAD_VAL(MEM_LOAD_VAL),
-    //     .MEM_OUT(MEM_OUT)
-    // );
 
     WAIT_STATE wait_state(
         .clk(clk),
@@ -237,27 +229,20 @@ module tt_um_simonsays (
     // DISPLAY: 01
     // WAIT: 10
     // CHECK: 11
-    // assign uo_out[4] = en_DISPLAY | en_CHECK;
     reg uo4_ff;
+    reg uo5_ff;
+    
     always @(posedge clk) begin
-        if (reset)
+        if (reset) begin
             uo4_ff <= 1'b0;
-        else
+            uo5_ff <= 1'b0;
+        end else begin
             uo4_ff <= en_DISPLAY | en_CHECK;
+            uo5_ff <=  en_WAIT | en_CHECK;
+        end
     end
 
     assign uo_out[4] = uo4_ff;
-
-
-    // assign uo_out[5] = en_WAIT | en_CHECK; 
-    reg uo5_ff;
-    always @(posedge clk) begin
-        if (reset)
-            uo5_ff <= 1'b0;
-        else
-            uo5_ff <=  en_WAIT | en_CHECK;
-    end
-
     assign uo_out[5] = uo5_ff;
 
     

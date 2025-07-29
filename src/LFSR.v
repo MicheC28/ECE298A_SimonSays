@@ -7,9 +7,6 @@ module LFSR (
     output complete_LFSR
 );
 
-    // reg [6:0] LFSR_out_next = 7'b0; // Next value to be assigned
-    // reg complete_LFSR_reg = 1'b0; // Register to hold completion status
-    // reg [3:0] count = 4'b0; // Counter to track the number of cycles
 
     reg [7:0] LFSR_out_next; // Next value to be assigned
     reg complete_LFSR_reg; // Register to hold completion status
@@ -28,7 +25,6 @@ module LFSR (
                 complete_LFSR_reg <= 1'b0;
                 count <= 4'b0;
             end else begin
-                // 7-bit LFSR with taps at bits 7 and 6 (primitive polynomial x^7 + x^6 + 1)
                 LFSR_out_next <= {LFSR_out_next[6:0], LFSR_out_next[7] ^ LFSR_out_next[5] ^ LFSR_out_next[4] ^ LFSR_out_next[3]};
                     if (count < 6)
                         count <= count + 1;
@@ -36,7 +32,6 @@ module LFSR (
                         complete_LFSR_reg <= 1;
             end
         end
-        // else: hold value (do nothing)
     end
 
     assign LFSR_OUT = LFSR_out_next;

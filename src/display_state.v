@@ -25,8 +25,6 @@ module display_state (
             complete_display <= 1'b0;
         end
         else begin
-            // complete_display <= 1'b0;    // default (1-cycle pulse)
-
             // ---------- start of a new round ----------------------
             if (en_display && !active) begin
                 pos    <= 4'd0;
@@ -48,7 +46,6 @@ module display_state (
             end
             else begin
                 // ---------- idle state ---------------------------
-                // colour_bus <= 2'bzz;      // internal Hi-Z
                 colour_oe  <= 1'b0;       // inform wrapper to tri-state pads
             end
         end
