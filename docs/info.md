@@ -30,7 +30,7 @@ Upon powering up the chip:
    - Note: Based on the design even if the user enters an incorrect colour early on, the user must enter enough colours for that sequence before the mistake is detected. For example, if the second colour entry is incorrect, the user will still need to enter the rest of the colours in the 14-colour sequence.
 
 5. **End of Game**
-   - Triggered when the player enters their sequence and is checked by the check_state block. The user can press the reset button to begin a new roundn of Simon Says.
+   - Triggered when the player enters their sequence and is checked by the check_state block. The user can press the reset button to begin a new round of Simon Says.
 
 ### Key Components
 
