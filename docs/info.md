@@ -70,11 +70,20 @@ Upon powering up the chip:
 
 ![I/O Table](io_table.png)
 
-### Timing Diagram
+### Timing Diagrams
 
-Below shows the expected timing diagram for one round of the game. It transitions between the IDLE, DISPLAY, WAIT, and CHECK states.
+<!-- Below shows the expected timing diagram for one round of the game. It transitions between the IDLE, DISPLAY, WAIT, and CHECK states.
 ![Timing Diagram](TimingDiagram.png)<br>
-Note, much of the timing relies on user input so the displayed state durations may not match the lengths during gameplay. A random LFSR Seed of 0x5B is loaded along with a current display sequence of 1, 4, 1, 8 or (0b0001, 0b0100, 0b0001, 0b1000).
+Note, much of the timing relies on user input so the displayed state durations may not match the lengths during gameplay. A random LFSR Seed of 0x5B is loaded along with a current display sequence of 1, 4, 1, 8 or (0b0001, 0b0100, 0b0001, 0b1000). -->
+
+During IDLE state, LFSR takes seed and produces shifted outputs. The outputs are loaded into the 32bit memory 8 bits at a time. See LFSR_SEED, LFSR_out, MEM_OUT signals.
+![](lfsr_load_mem.png)<br>
+
+During Display the sequence in memory is decoded and asserts on the output lines. See uo[3:0]. signal. Note, for simulation, the delay between displayed colours is significantly reduced. When played by the user, each colour display holds for 500ms.
+![](display.png)<br>
+
+During Wait and check, the user inputs are recorded and compared against the generated sequence. In this case, the sequence matches and thus game_complete goes to 1. See colour_val, colour_in signals, sequence_match, and game_complete signals.
+![](wait_and_check.png)<br>
 
 ## How to test
 
