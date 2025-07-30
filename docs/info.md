@@ -1,6 +1,6 @@
 ## How it works
 
-This project implements the classic _Simon Says_ game. The design uses digital logic to control game flow and memory elements to store a pseudo-random sequence of colors. The system interfaces with external buttons and LEDs to allow human interaction and gameplay.
+This project implements a modified version of the _Simon Says_ game. The design uses digital logic to control game flow and memory elements to store a pseudo-random sequence of colors. The system interfaces with external buttons and LEDs to allow human interaction and gameplay.
 
 ### Game Flow
 
@@ -16,7 +16,7 @@ Upon powering up the chip:
 
 2. **Display State**
 
-   - Displays the desired colour sequence on the LEDs.
+   - Displays the 14 colour sequence on the LEDs.
 
 3. **Wait State**
 
@@ -72,10 +72,6 @@ Upon powering up the chip:
 
 ### Timing Diagrams
 
-<!-- Below shows the expected timing diagram for one round of the game. It transitions between the IDLE, DISPLAY, WAIT, and CHECK states.
-![Timing Diagram](TimingDiagram.png)<br>
-Note, much of the timing relies on user input so the displayed state durations may not match the lengths during gameplay. A random LFSR Seed of 0x5B is loaded along with a current display sequence of 1, 4, 1, 8 or (0b0001, 0b0100, 0b0001, 0b1000). -->
-
 During IDLE state, LFSR takes seed and produces shifted outputs. The outputs are loaded into the 32bit memory 8 bits at a time. See LFSR_SEED, LFSR_out, MEM_OUT signals.
 ![](lfsr_load_mem.png)<br>
 
@@ -85,11 +81,21 @@ During Display the sequence in memory is decoded and asserts on the output lines
 During Wait and check, the user inputs are recorded and compared against the generated sequence. In this case, the sequence matches and thus game_complete goes to 1. See colour_val, colour_in signals, sequence_match, and game_complete signals.
 ![](wait_and_check.png)<br>
 
+STATES:
+IDLE:
+![](./Timing%20Diagram%20-%20States/idle.png)<br>
+DISPLAY:
+![](./Timing%20Diagram%20-%20States/display_state.png)<br>
+WAIT:
+![](./Timing%20Diagram%20-%20States/wait_state.png)<br>
+CHECK:
+![](./Timing%20Diagram%20-%20States/check.png)<br>
+
 ## How to test
 
 ### Gameplay Functionality
 
-- Simulate a full round win by entering the correct sequence.
+- Simulate a win by entering the correct sequence.
 - Simulate a mistake during the round. Game should detect incorrect input in `CHECK` and set the game_complete signal to 0, indicating a loss.
 
 ### Game State Transitions
@@ -97,9 +103,9 @@ During Wait and check, the user inputs are recorded and compared against the gen
 - Verify transitions using state debug signal:
   - `IDLE → DISPLAY → WAIT → CHECK
 - Confirm each state's role:
-  - `DISPLAY`: Colour is displayed long enough for user to understand and colour sequence is consistent between rounds.
+  - `DISPLAY`: Colour is displayed long enough (500ms) for users to understand and colour sequence is consistent between rounds.
   - `WAIT`: State ends only when all required colours are entered. (ex. in the 14-colour sequence, must wait until 14 colours are entered).
-  - `CHECK`: Correct validation. (if the user enters a correct sequence, it should end the game and set game_complete to 1, indicating a win.
+  - `CHECK`: Correct validation. (if the user enters a correct sequence, it should end the game and set game_complete to 1, indicating a win.)
 
 ### Startup & Seeding
 
@@ -119,3 +125,10 @@ During Wait and check, the user inputs are recorded and compared against the gen
 | Push Buttons | 6        | Red, Blue, Green, Yellow, Start, Reset                               |
 | LEDs         | 4        | One for each color, with pull-down resistors                         |
 | Raspberry Pi | 1        | Sends 8-bit seed to the chip and reads in a 2-bit State Debug Signal |
+
+To match encoding the following outputs should be wired to these colour leds:
+
+- uo[0] = red
+- uo[1] = blue
+- uo[2] = yellow
+- uo[3] = green
