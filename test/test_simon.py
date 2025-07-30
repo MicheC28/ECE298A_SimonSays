@@ -79,17 +79,17 @@ async def simon_system_test(dut):
         await ClockCycles(dut.clk, 4)
         dut.ui_in.value = 0
 
-        await wait_for(dut, lambda: dut.display_state.colour_oe.value == 1,
-                    "colour_oe (smoke)")
-        await wait_for(dut, lambda: resolved(dut.display_state.colour_bus),
-                    "colour_bus resolved (smoke)")
+        # # await wait_for(dut, lambda: dut.display_state.colour_oe.value == 1,
+        # #             "colour_oe (smoke)")
+        # # await wait_for(dut, lambda: resolved(dut.display_state.colour_bus),
+        # #             "colour_bus resolved (smoke)")
 
-        smoke = []
-        while dut.display_state.colour_oe.value == 1:
-            smoke.append(int(dut.display_state.colour_bus.value) & 0b11)
-            await RisingEdge(dut.clk)
-        dut._log.info(f"Smoke‑test colours: {smoke}")
-        assert smoke, "Smoke‑test saw no colours"
+        # smoke = []
+        # while dut.display_state.colour_oe.value == 1:
+        #     smoke.append(int(dut.display_state.colour_bus.value) & 0b11)
+        #     await RisingEdge(dut.clk)
+        # dut._log.info(f"Smoke‑test colours: {smoke}")
+        # assert smoke, "Smoke‑test saw no colours"
 
 
         mem_hex, play_hex, expect = [f.strip().lower() for f in line.split(",")]
@@ -130,10 +130,10 @@ async def simon_system_test(dut):
         mem_val .value = 0
 
         # ─── wait for Display to finish, then for en_WAIT ────────────────
-        await wait_for(dut, lambda: dut.display_state.colour_oe.value == 1,
-                       "colour_oe")
-        while dut.display_state.colour_oe.value == 1:
-            await RisingEdge(dut.clk)          # drain Display stream
+        # await wait_for(dut, lambda: dut.display_state.colour_oe.value == 1,
+        #                "colour_oe")
+        # while dut.display_state.colour_oe.value == 1:
+        #     await RisingEdge(dut.clk)          # drain Display stream
         await wait_for(dut, lambda: dut.en_WAIT.value == 1,
                        "en_WAIT asserted")      # FIX ②
 

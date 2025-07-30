@@ -33,7 +33,7 @@ module display_state #(
             complete_display <= 1'b0;
             hold_ctr         <= {($clog2(HOLD_CYCLES)){1'b0}};
         end else begin
-            complete_display <= 1'b0;  // default (pulse only when asserted)
+            // complete_display <= 1'b0;  // default (pulse only when asserted)
 
             // ---------- start of a new round ----------------------
             if (en_display && !active) begin
@@ -45,27 +45,27 @@ module display_state #(
             // ---------- active colour streaming ------------------
             if (active) begin
                 colour_bus <= seq_in_display[{1'b0, pos} +: 2];
-                colour_oe  <= 1'b1;  // drive bus for entire hold window
 
-                // stay on this colour until hold_ctr reaches limit
-                if (hold_ctr == HOLD_CYCLES-1) begin
-                    hold_ctr <= {($clog2(HOLD_CYCLES)){1'b0}}; // reset timer
+                if (hold_ctr == HOLD_CYCLES - 1) begin
+                    hold_ctr <= 0;
+
+                    // Toggle enable on each new colour
+                    colour_oe <= ~colour_oe;
 
                     if (pos == round_ctr) begin
-                        // last colour of round finished displaying
                         complete_display <= 1'b1;
                         active           <= 1'b0;
-                        colour_oe        <= 1'b0; // release bus next cycle
-                    end else begin
-                        pos <= pos + 1'b1;  // advance to next colour
+                        colour_oe        <= 1'b0;
+                    end else if(colour_oe)begin
+                        pos <= pos + 1'b1;
                     end
                 end else begin
-                    hold_ctr <= hold_ctr + 1'b1;
+                    hold_ctr <= hold_ctr + 1;
                 end
             end else begin
-                // ---------- idle state ---------------------------
-                colour_oe <= 1'b0;  // inform wrapper to tri‑state pads
+                colour_oe <= 1'b0;
             end
+
         end
     end
 endmodule

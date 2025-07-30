@@ -203,7 +203,24 @@ module tt_um_simonsays (
         .rst_check_out(check_rst_CHECK_OUT)
     );
 
-    display_state display_state(
+    // display_state display_state(
+    //     .clk(clk),
+    //     .rst_display(rst_DISPLAY),
+    //     .en_display(en_DISPLAY),
+    //     .seq_in_display(MEM_OUT),
+    //     .round_ctr(counter_out),
+    //     .colour_bus(colour_enc_in),
+    //     .colour_oe(en_colour_enc),
+    //     .complete_display(complete_DISPLAY)
+    // );
+
+    `ifdef COCOTB_SIM
+    display_state #(
+        .HOLD_CYCLES(10)  // shorter delay for simulation
+    ) display_state_inst (
+    `else
+    display_state display_state_inst (
+    `endif
         .clk(clk),
         .rst_display(rst_DISPLAY),
         .en_display(en_DISPLAY),
@@ -213,6 +230,7 @@ module tt_um_simonsays (
         .colour_oe(en_colour_enc),
         .complete_display(complete_DISPLAY)
     );
+
 
     SEQUENCE_MEM sequence_mem(
         .clk(clk),
