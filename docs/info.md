@@ -82,16 +82,47 @@ During Wait and check, the user inputs are recorded and compared against the gen
 ![](wait_and_check.png)<br>
 
 STATES:
-IDLE:
+IDLE:<br>
 ![](./Timing%20Diagram%20-%20States/idle.png)<br>
-DISPLAY:
+DISPLAY:<br>
 ![](./Timing%20Diagram%20-%20States/display_state.png)<br>
-WAIT:
+WAIT:<br>
 ![](./Timing%20Diagram%20-%20States/wait_state.png)<br>
-CHECK:
+CHECK:<br>
 ![](./Timing%20Diagram%20-%20States/check.png)<br>
 
 ## How to test
+
+### Functional Testing - test_simon.py
+
+This testbench performs a smoke test and a full functional verification of the Simon Says system using stimulus vectors from a CSV file. It exercises the interaction between memory loading, display, wait, and check states, simulating user inputs and verifying the game logic. The test assumes a 10 MHz clock (50 ns half period).
+
+Sequential simulation:
+
+1. Resets the system and asserts START.
+2. Waits for the IDLE state to complete before loading the test sequence into memory.
+3. Waits for the system to enter the WAIT state (en_WAIT).
+4. Replays the player’s input sequence as a series of button presses.
+5. Waits for completion signals (complete_WAIT, complete_CHECK).
+6. Compares the result of the sequence check against the expected outcome.
+
+Success criteria:
+
+- The system completes the WAIT and CHECK states for each test vector.
+- The sequences_match flag correctly reflects whether the player’s sequence matches the stored sequence.
+- The observed PASS/FAIL result matches the expected outcome from the CSV vector.
+
+Failure criteria:
+
+- Timeout or failure to assert critical handshake signals within the timeout window.
+- Mismatch between expected and actual pass/fail results for any test vector.
+
+CSV Contents:<br>
+![](./csv.png)<br>
+| Seed | User Input | Expected Result |
+
+Results:
+![](./test_simon.png)<br>
 
 ### Gameplay Functionality
 
