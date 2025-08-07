@@ -13,7 +13,7 @@ MEM_DATA_SIG = "mem.test_data"     # 32‑bit word to poke
 MEM_LOAD_SIG = "mem.test_load"     # 1‑cycle load strobe
 MEM_VAL_SIG  = "mem.MEM_LOAD_VAL"  # 2‑bit byte‑enable (write mask)
 
-seeds = [0x5A, 0x4B, 0x3C, 0x2D]
+seeds = []
 
 # ───────── helpers ────────────────────────────────────────────────────────
 @cocotb.coroutine
@@ -66,6 +66,9 @@ async def simon_system_test(dut):
     vecs = pathlib.Path("vectors.csv").read_text().strip().splitlines()
     if not vecs:
         raise TestFailure("vectors.csv is empty or missing")
+
+    # Parse CSV once to fill seeds with the first field (seed) converted to int
+    seeds = [int(line.split(",")[0].strip(), 16) for line in vecs]
 
     for idx, line in enumerate(vecs, start=1):
         dut.ena .value = 1
