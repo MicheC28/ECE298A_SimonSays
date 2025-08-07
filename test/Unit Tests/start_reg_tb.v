@@ -18,6 +18,10 @@ module tb_start_reg;
     always #5 clk = ~clk;
 
     initial begin
+        // VCD dump setup
+        $dumpfile("start_reg_tb.vcd");
+        $dumpvars(0, tb_start_reg);
+
         $display("Time\tRST\tSTART\tOUT");
 
         // Initialize

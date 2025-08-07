@@ -23,9 +23,10 @@ module wait_state_tb;
         .sequence_val(sequence)
     );
 
-    // Clock generation
+    // Clock generation: 10ns period
     always #5 clk = ~clk;
 
+    // Task to send a colour value on the next negedge of clk
     task send_colour(input [1:0] val);
         begin
             @(negedge clk);
@@ -37,39 +38,54 @@ module wait_state_tb;
     endtask
 
     initial begin
-    $dumpfile("wait_state_tb.vcd");
-    $dumpvars(0, wait_state_tb);
+        $dumpfile("wait_state_tb.vcd");
+        $dumpvars(0, wait_state_tb);
 
-    // Initial state
-    rst = 1;
-    en = 0;
-    colour_in = 0;
-    colour_val = 0;
-    sequence_len = 4;
+        // Reset
+        rst = 1;
+        en = 0;
+        colour_in = 0;
+        colour_val = 0;
+        sequence_len = 14;
 
-    #10;
-    @(negedge clk); rst = 0; // Release reset
-    @(negedge clk); en = 1;  // Enable module
+        #10;
+        @(negedge clk) rst = 0; // Release reset
+        @(negedge clk) en = 1;  // Enable module
 
-    // Send 4 colours: 01, 10, 11, 11
-    send_colour(2'b11);
-    send_colour(2'b10);
-    send_colour(2'b11);
-    send_colour(2'b11);
+        // Send 14 colours
+            send_colour(2'b00);
+            send_colour(2'b01);
+            send_colour(2'b10);
+            send_colour(2'b11);
+            send_colour(2'b00);
+            send_colour(2'b01);
+            send_colour(2'b10);
+            send_colour(2'b11);
+            send_colour(2'b00);
+            send_colour(2'b01);
+            send_colour(2'b10);
+            send_colour(2'b11);
+            send_colour(2'b00);
+            send_colour(2'b01);
 
-    // Wait for complete_wait
-    wait (complete_wait == 1);
+        
 
-    $display("Final sequence (binary): %032b", sequence);
+        // Wait for complete_wait to go high (now 1 cycle after last input)
+        wait (complete_wait == 1);
 
-    #10;
-    $finish;
-end
+        // Allow one more cycle to ensure stability
+        @(posedge clk);
 
-initial begin
-    $monitor("T=%0t rst=%b en=%b colour_in=%b colour_val=%b count=%0d sequence=%032b complete_wait=%b",
-             $time, rst, en, colour_in, colour_val, uut.count, sequence, complete_wait);
-end
+        $display("Final sequence (binary): %032b", sequence);
 
+        #10;
+        $finish;
+    end
+
+    // Monitor key signals for debugging
+    initial begin
+        $monitor("T=%0t rst=%b en=%b colour_in=%b colour_val=%b count=%0d sequence=%032b complete_wait=%b",
+                 $time, rst, en, colour_in, colour_val, uut.count, sequence, complete_wait);
+    end
 
 endmodule
