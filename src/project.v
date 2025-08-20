@@ -131,6 +131,8 @@ module tt_um_simonsays (
     );
 
     colour_encoder encoder(
+        .clk(clk),
+        .reset(reset),
         .oe(en_colour_enc),
         .colour_enc_in(colour_enc_in),
         .uo(uo_out[3:0]) // need enable?
@@ -260,8 +262,22 @@ module tt_um_simonsays (
         end
     end
 
-    assign uo_out[4] = uo4_ff;
-    assign uo_out[5] = uo5_ff;
+    // Add output registers for proper timing
+    reg uo4_out_reg;
+    reg uo5_out_reg;
+    
+    always @(posedge clk) begin
+        if (reset) begin
+            uo4_out_reg <= 1'b0;
+            uo5_out_reg <= 1'b0;
+        end else begin
+            uo4_out_reg <= uo4_ff;
+            uo5_out_reg <= uo5_ff;
+        end
+    end
+
+    assign uo_out[4] = uo4_out_reg;
+    assign uo_out[5] = uo5_out_reg;
 
     
     // drive unused ports
