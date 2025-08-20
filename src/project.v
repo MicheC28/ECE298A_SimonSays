@@ -282,20 +282,12 @@ module tt_um_simonsays (
 
     sky130_fd_sc_hd__buf_1 uo4_buf1 (
         .X(uo4_delayed),
-        .A(uo4_out_reg),
-        .VPWR(1'b1),
-        .VGND(1'b0),
-        .VPB(1'b1),
-        .VNB(1'b0)
+        .A(uo4_out_reg)
     );
 
     sky130_fd_sc_hd__buf_1 uo5_buf1 (
         .X(uo5_delayed),
-        .A(uo5_out_reg),
-        .VPWR(1'b1),
-        .VGND(1'b0),
-        .VPB(1'b1),
-        .VNB(1'b0)
+        .A(uo5_out_reg)
     );
 
     // Assign buffered outputs to pins
