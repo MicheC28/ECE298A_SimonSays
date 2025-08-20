@@ -46,7 +46,7 @@ module display_state #(
             if (active) begin
                 colour_bus <= seq_in_display[{1'b0, pos} +: 2];
 
-                if (hold_ctr == HOLD_CYCLES - 1) begin
+                if (hold_ctr == (HOLD_CYCLES - 1)[$clog2(HOLD_CYCLES)-1:0]) begin
                     hold_ctr <= 0;
 
                     // Toggle enable on each new colour

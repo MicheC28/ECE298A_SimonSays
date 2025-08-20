@@ -20,7 +20,7 @@ module MEM (
                 2'd0: MEM_OUT[ 7:0] <= MEM_IN;
                 2'd1: MEM_OUT[15:8] <= MEM_IN;
                 2'd2: MEM_OUT[23:16]<= MEM_IN;
-                2'd3: MEM_OUT[27:24]<= MEM_IN;
+                2'd3: MEM_OUT[31:24]<= MEM_IN;
             endcase
         end
     end
