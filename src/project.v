@@ -247,23 +247,25 @@ module tt_um_simonsays (
     // DISPLAY: 01
     // WAIT: 10
     // CHECK: 11
+    
+    // Internal flip-flops
     reg uo4_ff;
     reg uo5_ff;
-    
+
     always @(posedge clk) begin
         if (reset) begin
             uo4_ff <= 1'b0;
             uo5_ff <= 1'b0;
         end else begin
             uo4_ff <= en_DISPLAY | en_CHECK;
-            uo5_ff <=  en_WAIT | en_CHECK;
+            uo5_ff <= en_WAIT | en_CHECK;
         end
     end
 
-        // Add output registers for proper timing
+    // Output registers for proper timing
     reg uo4_out_reg;
     reg uo5_out_reg;
-    
+
     always @(posedge clk) begin
         if (reset) begin
             uo4_out_reg <= 1'b0;
@@ -274,17 +276,32 @@ module tt_um_simonsays (
         end
     end
 
-    // --- Insert buffer chain for extra delay ---
+    // --- Sky130 buffers to delay the output ---
     wire uo4_delayed;
     wire uo5_delayed;
 
-    // Parameterizable delay using 2 buffers (adjust N for more delay)
-    sky130_fd_sc_hd__buf_1 uo4_buf1 (.Y(uo4_delayed), .A(uo4_out_reg));
-    sky130_fd_sc_hd__buf_1 uo5_buf1 (.Y(uo5_delayed), .A(uo5_out_reg));
+    sky130_fd_sc_hd__buf_1 uo4_buf1 (
+        .X(uo4_delayed),
+        .A(uo4_out_reg),
+        .VPWR(1'b1),
+        .VGND(1'b0),
+        .VPB(1'b1),
+        .VNB(1'b0)
+    );
 
-    // Assign buffered signals to output
+    sky130_fd_sc_hd__buf_1 uo5_buf1 (
+        .X(uo5_delayed),
+        .A(uo5_out_reg),
+        .VPWR(1'b1),
+        .VGND(1'b0),
+        .VPB(1'b1),
+        .VNB(1'b0)
+    );
+
+    // Assign buffered outputs to pins
     assign uo_out[4] = uo4_delayed;
     assign uo_out[5] = uo5_delayed;
+
 
 
     
