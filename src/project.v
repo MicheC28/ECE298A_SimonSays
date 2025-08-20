@@ -261,21 +261,33 @@ module tt_um_simonsays (
     end
 
         // Add output registers for proper timing
-    reg uo4_out_reg;
-    reg uo5_out_reg;
+    // reg uo4_out_reg;
+    // reg uo5_out_reg;
     
-    always @(posedge clk) begin
-        if (reset) begin
-            uo4_out_reg <= 1'b0;
-            uo5_out_reg <= 1'b0;
-        end else begin
-            uo4_out_reg <= uo4_ff;
-            uo5_out_reg <= uo5_ff;
-        end
-    end
+    // always @(posedge clk) begin
+    //     if (reset) begin
+    //         uo4_out_reg <= 1'b0;
+    //         uo5_out_reg <= 1'b0;
+    //     end else begin
+    //         uo4_out_reg <= uo4_ff;
+    //         uo5_out_reg <= uo5_ff;
+    //     end
+    // end
 
-    assign uo_out[4] = uo4_out_reg;
-    assign uo_out[5] = uo5_out_reg;
+    // assign uo_out[4] = uo4_out_reg;
+    // assign uo_out[5] = uo5_out_reg;
+
+    // IO pad cell (from sky130_fd_io library)
+sky130_fd_io__top_gpio uo4_pad (
+    .PAD      (uo_out[4]),   // Bond pad
+    .OE_N     (1'b0),        // Always drive
+    .DM       (3'b110),      // Mode = output
+    .IN       (),            // Not used (input path)
+    .IN_H     (),            // Not used
+    .OUT      (uo4_ff),     // Drive pad from register
+    .HLD_H_N  (1'b1),        // Hold disable
+    .ENABLE_H (1'b1)         // Enable
+);
 
     
     // drive unused ports
