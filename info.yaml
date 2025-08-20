@@ -28,6 +28,7 @@ project:
     - "colour_encoder.v"
     - "colour_decoder.v"
     - "start_reg.v"
+    - "buffer_stub.v"
 
 libraries:
   - name: sky130_fd_sc_hd
