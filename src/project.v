@@ -17,8 +17,7 @@ module tt_um_simonsays (
     //Input
     wire reset;                             
     wire start; 
-    wire START_REG_OUT;
-    wire rst_START_REG; 
+    wire START_REG_OUT; 
     
 
     //IDLE 
@@ -46,7 +45,6 @@ module tt_um_simonsays (
     wire en_DISPLAY;
     wire rst_DISPLAY;
     wire complete_DISPLAY;
-    wire [31:0] seq_in_DISPLAY;
 
     
 
@@ -80,7 +78,6 @@ module tt_um_simonsays (
     wire en_colour_enc; 
 
     //Decoder - input
-    wire [3:0] colour_dec_in;
     wire [1:0]colour_dec_out;
 
     // Assignments
@@ -88,10 +85,6 @@ module tt_um_simonsays (
     assign reset = ~rst_n | ui_in[4];
     assign start = ui_in[5];
     assign LFSR_SEED = uio_in[7:0];
-    assign colour_dec_in = ui_in[3:0];
-    
-    // START
-    assign rst_START_REG = ~rst_n;
 
     //IDLE
     assign en_IDLE = START_REG_OUT & ~complete_IDLE;
