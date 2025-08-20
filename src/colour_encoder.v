@@ -11,9 +11,13 @@ module colour_encoder (
 
     // Add output registers for proper timing
     reg [3:0] uo_reg;
+    reg [3:0] uo_out_reg;  // Additional output register stage
     
     always @(posedge clk) begin
-        if (oe) begin
+        if (reset) begin
+            uo_reg <= 4'b0000;
+            uo_out_reg <= 4'b0000;
+        end else if (oe) begin
             // Set outputs based on input encoding
             uo_reg[0] <= ~colour_enc_in[0] & ~colour_enc_in[1]; // red
             uo_reg[1] <=  colour_enc_in[0] & ~colour_enc_in[1]; // blue
@@ -25,6 +29,15 @@ module colour_encoder (
         end
     end
     
-    assign uo = uo_reg;
+    // Additional register stage to increase clock-to-output delay
+    always @(posedge clk) begin
+        if (reset) begin
+            uo_out_reg <= 4'b0000;
+        end else begin
+            uo_out_reg <= uo_reg;
+        end
+    end
+    
+    assign uo = uo_out_reg;
 
 endmodule
