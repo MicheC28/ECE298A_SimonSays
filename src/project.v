@@ -15,10 +15,8 @@ module tt_um_simonsays (
   // Local Signals
 
     //Input
-    wire reset = ~rst_n | ui_in[4];                             
-
-    //Start Reg
-    wire start = ui_in[5]; 
+    wire reset;                             
+    wire start; 
     wire START_REG_OUT;
     wire rst_START_REG; 
     
@@ -29,7 +27,7 @@ module tt_um_simonsays (
     wire complete_IDLE; 
     
     //LFSR
-    wire [7:0] LFSR_SEED = uio_in[7:0];
+    wire [7:0] LFSR_SEED;
     wire [7:0] LFSR_out;
     wire complete_LFSR;                              
     wire en_LFSR;
@@ -82,10 +80,16 @@ module tt_um_simonsays (
     wire en_colour_enc; 
 
     //Decoder - input
-    wire [3:0] colour_dec_in = ui_in[3:0];
+    wire [3:0] colour_dec_in;
     wire [1:0]colour_dec_out;
 
     // Assignments
+    // Input assignments
+    assign reset = ~rst_n | ui_in[4];
+    assign start = ui_in[5];
+    assign LFSR_SEED = uio_in[7:0];
+    assign colour_dec_in = ui_in[3:0];
+    
     // START
     assign rst_START_REG = ~rst_n;
 
