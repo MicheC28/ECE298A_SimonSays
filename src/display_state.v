@@ -20,7 +20,7 @@ module display_state #(
     // ───────────────── internal state ─────────────────────────────
     reg [3:0]       pos;         // which 2‑bit colour we’re on
     reg             active;      // high while inside a round
-    reg [$clog2(HOLD_CYCLES)-1:0] hold_ctr; // ticks spent on current colour
+    reg [31:0] hold_ctr; // ticks spent on current colour
 
     // ───────────────── sequential logic ──────────────────────────
     always @(posedge clk) begin
@@ -31,7 +31,7 @@ module display_state #(
             colour_bus       <= 2'b00;
             colour_oe        <= 1'b0;
             complete_display <= 1'b0;
-            hold_ctr         <= {($clog2(HOLD_CYCLES)){1'b0}};
+            hold_ctr         <= 32'b0;
         end else begin
             // complete_display <= 1'b0;  // default (pulse only when asserted)
 
@@ -39,7 +39,7 @@ module display_state #(
             if (en_display && !active) begin
                 active    <= 1'b1;
                 pos       <= 4'd0;
-                hold_ctr  <= {($clog2(HOLD_CYCLES)){1'b0}};
+                hold_ctr  <= 32'b0;
             end
 
             // ---------- active colour streaming ------------------
