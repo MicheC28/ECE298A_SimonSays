@@ -268,7 +268,7 @@ module tt_um_simonsays (
     // Parameterized buffer module for timing delay
     parameterized_buffer #(
         .WIDTH(4),
-        .BUFFER_STAGES(5)  // Adjust this number to control delay
+        .BUFFER_STAGES(8)  // Increased from 5 to 8 for more delay
     ) display_buffer (
         .data_in(display_output_reg2),
         .data_out(display_output_delayed)
@@ -310,7 +310,7 @@ module tt_um_simonsays (
 
     parameterized_buffer #(
         .WIDTH(1),
-        .BUFFER_STAGES(3)  // Adjust this number to control delay
+        .BUFFER_STAGES(6)  // Increased from 3 to 6 for more delay
     ) uo4_buffer (
         .data_in(uo4_out_reg),
         .data_out(uo4_delayed)
@@ -318,7 +318,7 @@ module tt_um_simonsays (
 
     parameterized_buffer #(
         .WIDTH(1),
-        .BUFFER_STAGES(3)  // Adjust this number to control delay
+        .BUFFER_STAGES(6)  // Increased from 3 to 6 for more delay
     ) uo5_buffer (
         .data_in(uo5_out_reg),
         .data_out(uo5_delayed)
