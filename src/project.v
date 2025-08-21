@@ -268,7 +268,7 @@ module tt_um_simonsays (
     // Parameterized buffer module for timing delay
     parameterized_buffer #(
         .WIDTH(4),
-        .BUFFER_STAGES(8)  // Increased from 5 to 8 for more delay
+        .BUFFER_STAGES(12)  // Increased from 5 to 8 for more delay
     ) display_buffer (
         .data_in(display_output_reg2),
         .data_out(display_output_delayed)
