@@ -310,7 +310,7 @@ module tt_um_simonsays (
 
     parameterized_buffer #(
         .WIDTH(1),
-        .BUFFER_STAGES(6)  // Increased from 3 to 6 for more delay
+        .BUFFER_STAGES(40)  // Increased from 3 to 6 for more delay
     ) uo4_buffer (
         .data_in(uo4_out_reg),
         .data_out(uo4_delayed)
@@ -318,7 +318,7 @@ module tt_um_simonsays (
 
     parameterized_buffer #(
         .WIDTH(1),
-        .BUFFER_STAGES(6)  // Increased from 3 to 6 for more delay
+        .BUFFER_STAGES(40)  // Increased from 3 to 6 for more delay
     ) uo5_buffer (
         .data_in(uo5_out_reg),
         .data_out(uo5_delayed)
