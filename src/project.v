@@ -264,48 +264,14 @@ module tt_um_simonsays (
     end
 
     wire [3:0] display_output_delayed;
-    wire [3:0] display_output_buffered;  // Intermediate buffer stage
 
-    // First buffer stage
-    sky130_fd_sc_hd__buf_1 uo0_buf1 (
-        .X(display_output_buffered[0]),
-        .A(display_output_reg2[0])
-    );
-
-    sky130_fd_sc_hd__buf_1 uo1_buf1 (
-        .X(display_output_buffered[1]),
-        .A(display_output_reg2[1])
-    );
-
-    sky130_fd_sc_hd__buf_1 uo2_buf1 (
-        .X(display_output_buffered[2]),
-        .A(display_output_reg2[2])
-    );
-
-    sky130_fd_sc_hd__buf_1 uo3_buf1 (
-        .X(display_output_buffered[3]),
-        .A(display_output_reg2[3])
-    );
-
-    // Second buffer stage for additional delay
-    sky130_fd_sc_hd__buf_1 uo0_buf2 (
-        .X(display_output_delayed[0]),
-        .A(display_output_buffered[0])
-    );
-
-    sky130_fd_sc_hd__buf_1 uo1_buf2 (
-        .X(display_output_delayed[1]),
-        .A(display_output_buffered[1])
-    );
-
-    sky130_fd_sc_hd__buf_1 uo2_buf2 (
-        .X(display_output_delayed[2]),
-        .A(display_output_buffered[2])
-    );
-
-    sky130_fd_sc_hd__buf_1 uo3_buf2 (
-        .X(display_output_delayed[3]),
-        .A(display_output_buffered[3])
+    // Parameterized buffer module for timing delay
+    parameterized_buffer #(
+        .WIDTH(4),
+        .BUFFER_STAGES(5)  // Adjust this number to control delay
+    ) display_buffer (
+        .data_in(display_output_reg2),
+        .data_out(display_output_delayed)
     );
 
     assign uo_out[3:0] = display_output_delayed;
@@ -338,18 +304,24 @@ module tt_um_simonsays (
         end
     end
 
-    // --- Sky130 buffers to delay the output ---
+    // --- Parameterized buffers to delay the output ---
     wire uo4_delayed;
     wire uo5_delayed;
 
-    sky130_fd_sc_hd__buf_1 uo4_buf1 (
-        .X(uo4_delayed),
-        .A(uo4_out_reg)
+    parameterized_buffer #(
+        .WIDTH(1),
+        .BUFFER_STAGES(3)  // Adjust this number to control delay
+    ) uo4_buffer (
+        .data_in(uo4_out_reg),
+        .data_out(uo4_delayed)
     );
 
-    sky130_fd_sc_hd__buf_1 uo5_buf1 (
-        .X(uo5_delayed),
-        .A(uo5_out_reg)
+    parameterized_buffer #(
+        .WIDTH(1),
+        .BUFFER_STAGES(3)  // Adjust this number to control delay
+    ) uo5_buffer (
+        .data_in(uo5_out_reg),
+        .data_out(uo5_delayed)
     );
 
     // Assign buffered outputs to pins
