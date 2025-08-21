@@ -249,7 +249,7 @@ module tt_um_simonsays (
     // WAIT: 10
     // CHECK: 11
 
-    //reg for display output
+    //reg for display output - Use double register + double buffer for timing
     reg [3:0] display_output_reg;
     reg [3:0] display_output_reg2;  // Additional register stage
     
@@ -264,25 +264,48 @@ module tt_um_simonsays (
     end
 
     wire [3:0] display_output_delayed;
+    wire [3:0] display_output_buffered;  // Intermediate buffer stage
 
+    // First buffer stage
     sky130_fd_sc_hd__buf_1 uo0_buf1 (
-        .X(display_output_delayed[0]),
-        .A(display_output_reg2[0])  // Use second register stage
+        .X(display_output_buffered[0]),
+        .A(display_output_reg2[0])
     );
 
     sky130_fd_sc_hd__buf_1 uo1_buf1 (
-        .X(display_output_delayed[1]),
-        .A(display_output_reg2[1])  // Use second register stage
+        .X(display_output_buffered[1]),
+        .A(display_output_reg2[1])
     );
 
     sky130_fd_sc_hd__buf_1 uo2_buf1 (
-        .X(display_output_delayed[2]),
-        .A(display_output_reg2[2])  // Use second register stage
+        .X(display_output_buffered[2]),
+        .A(display_output_reg2[2])
     );
 
     sky130_fd_sc_hd__buf_1 uo3_buf1 (
+        .X(display_output_buffered[3]),
+        .A(display_output_reg2[3])
+    );
+
+    // Second buffer stage for additional delay
+    sky130_fd_sc_hd__buf_1 uo0_buf2 (
+        .X(display_output_delayed[0]),
+        .A(display_output_buffered[0])
+    );
+
+    sky130_fd_sc_hd__buf_1 uo1_buf2 (
+        .X(display_output_delayed[1]),
+        .A(display_output_buffered[1])
+    );
+
+    sky130_fd_sc_hd__buf_1 uo2_buf2 (
+        .X(display_output_delayed[2]),
+        .A(display_output_buffered[2])
+    );
+
+    sky130_fd_sc_hd__buf_1 uo3_buf2 (
         .X(display_output_delayed[3]),
-        .A(display_output_reg2[3])  // Use second register stage
+        .A(display_output_buffered[3])
     );
 
     assign uo_out[3:0] = display_output_delayed;
