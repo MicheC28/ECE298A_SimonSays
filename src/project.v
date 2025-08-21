@@ -251,11 +251,15 @@ module tt_um_simonsays (
 
     //reg for display output
     reg [3:0] display_output_reg;
+    reg [3:0] display_output_reg2;  // Additional register stage
+    
     always @(posedge clk) begin
         if (reset) begin
             display_output_reg <= 4'b0000;
+            display_output_reg2 <= 4'b0000;
         end else begin
             display_output_reg <= colour_enc_out;
+            display_output_reg2 <= display_output_reg;  // Second register stage
         end
     end
 
@@ -263,22 +267,22 @@ module tt_um_simonsays (
 
     sky130_fd_sc_hd__buf_1 uo0_buf1 (
         .X(display_output_delayed[0]),
-        .A(display_output_reg[0])
+        .A(display_output_reg2[0])  // Use second register stage
     );
 
     sky130_fd_sc_hd__buf_1 uo1_buf1 (
         .X(display_output_delayed[1]),
-        .A(display_output_reg[1])
+        .A(display_output_reg2[1])  // Use second register stage
     );
 
     sky130_fd_sc_hd__buf_1 uo2_buf1 (
         .X(display_output_delayed[2]),
-        .A(display_output_reg[2])
+        .A(display_output_reg2[2])  // Use second register stage
     );
 
     sky130_fd_sc_hd__buf_1 uo3_buf1 (
         .X(display_output_delayed[3]),
-        .A(display_output_reg[3])
+        .A(display_output_reg2[3])  // Use second register stage
     );
 
     assign uo_out[3:0] = display_output_delayed;
