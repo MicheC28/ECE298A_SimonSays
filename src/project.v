@@ -80,6 +80,7 @@ module tt_um_simonsays (
     //Encoder - output
     wire [1:0] colour_enc_in;
     wire en_colour_enc; 
+    wire [3:0] colour_enc_out;
 
     //Decoder - input
     wire [3:0] colour_dec_in = ui_in[3:0];
@@ -133,7 +134,7 @@ module tt_um_simonsays (
     colour_encoder encoder(
         .oe(en_colour_enc),
         .colour_enc_in(colour_enc_in),
-        .uo(uo_out[3:0]) // need enable?
+        .uo(colour_enc_out) // need enable?
     );
 
     LFSR lfsr(
@@ -247,7 +248,41 @@ module tt_um_simonsays (
     // DISPLAY: 01
     // WAIT: 10
     // CHECK: 11
-    
+
+    //reg for display output
+    reg [3:0] display_output_reg;
+    always @(posedge clk) begin
+        if (reset) begin
+            display_output_reg <= 4'b0000;
+        end else begin
+            display_output_reg <= colour_enc_out;
+        end
+    end
+
+    wire [3:0] display_output_delayed;
+
+    sky130_fd_sc_hd__buf_1 uo0_buf1 (
+        .X(display_output_delayed[0]),
+        .A(display_output_reg[0])
+    );
+
+    sky130_fd_sc_hd__buf_1 uo1_buf1 (
+        .X(display_output_delayed[1]),
+        .A(display_output_reg[1])
+    );
+
+    sky130_fd_sc_hd__buf_1 uo2_buf1 (
+        .X(display_output_delayed[2]),
+        .A(display_output_reg[2])
+    );
+
+    sky130_fd_sc_hd__buf_1 uo3_buf1 (
+        .X(display_output_delayed[3]),
+        .A(display_output_reg[3])
+    );
+
+    assign uo_out[3:0] = display_output_delayed;
+
     // Internal flip-flops
     reg uo4_ff;
     reg uo5_ff;
