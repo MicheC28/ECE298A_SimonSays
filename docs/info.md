@@ -25,12 +25,12 @@ Upon powering up the chip:
 4. **Check State**
 
    - Verifies the user inputs against the stored colour sequence.
-   - If correct, the game ends and is considered to be won. The game_complete signal will be 1, indicating a win.
-   - If incorrect, the game ends and is considered to be lost. The game_complete signal will be 0, indicating a loss.
+   - If correct, the game ends and is considered to be won. The `game_complete` signal will be `1`, indicating a win.
+   - If incorrect, the game ends and is considered to be lost. The `game_complete` signal will be `0`, indicating a loss.
    - Note: Based on the design even if the user enters an incorrect colour early on, the user must enter enough colours for that sequence before the mistake is detected. For example, if the second colour entry is incorrect, the user will still need to enter the rest of the colours in the 14-colour sequence.
 
 5. **End of Game**
-   - Triggered when the player enters their sequence and is checked by the check_state block. The user can press the reset button to begin a new round of Simon Says.
+   - Triggered when the player enters their sequence and is checked by the `check_state` block. The user can press the reset button to begin a new round of Simon Says.
 
 ### Key Components
 
@@ -55,7 +55,8 @@ Upon powering up the chip:
 5. **State Debug**
 
    - Current game state -- represented as a 2 bit value -- is assert on 2 output ports as a means to debug.
-     uo_out[5]uo_out[4]
+
+   uo_out[5]uo_out[4]
 
    IDLE: 00
    DISPLAY: 01
@@ -72,24 +73,33 @@ Upon powering up the chip:
 
 ### Timing Diagrams
 
-During IDLE state, LFSR takes seed and produces shifted outputs. The outputs are loaded into the 32bit memory 8 bits at a time. See LFSR_SEED, LFSR_out, MEM_OUT signals.
+During IDLE state, LFSR takes seed and produces shifted outputs. The outputs are loaded into the 32bit memory 8 bits at a time. See LFSR_SEED, LFSR_out, MEM_OUT signals. <br>
 ![](lfsr_load_mem.png)<br>
 
-During Display the sequence in memory is decoded and asserts on the output lines. See uo[3:0]. signal. Note, for simulation, the delay between displayed colours is significantly reduced. When played by the user, each colour display holds for 500ms.
+During Display the sequence in memory is decoded and asserts on the output lines. See uo[3:0]. signal. Note, for simulation, the delay between displayed colours is significantly reduced. When played by the user, each colour display holds for 500ms.<br>
 ![](display.png)<br>
 
-During Wait and check, the user inputs are recorded and compared against the generated sequence. In this case, the sequence matches and thus game_complete goes to 1. See colour_val, colour_in signals, sequence_match, and game_complete signals.
+During Wait and check, the user inputs are recorded and compared against the generated sequence. In this case, the sequence matches and thus game_complete goes to 1. See colour_val, colour_in signals, sequence_match, and game_complete signals.<br>
 ![](wait_and_check.png)<br>
 
 STATES:
-IDLE:<br>
+
+IDLE:
+
 ![](./Timing%20Diagram%20-%20States/idle.png)<br>
-DISPLAY:<br>
+
+DISPLAY:
+
 ![](./Timing%20Diagram%20-%20States/display_state.png)<br>
-WAIT:<br>
+
+WAIT:
+
 ![](./Timing%20Diagram%20-%20States/wait_state.png)<br>
-CHECK:<br>
+
+CHECK:
+
 ![](./Timing%20Diagram%20-%20States/check.png)<br>
+
 
 ## How to test
 
@@ -99,17 +109,17 @@ This testbench performs a smoke test and a full functional verification of the S
 
 Sequential simulation:
 
-1. Resets the system and asserts START.
-2. Waits for the IDLE state to complete before loading the test sequence into memory.
-3. Waits for the system to enter the WAIT state (en_WAIT).
+1. Resets the system and asserts `START`.
+2. Waits for the `IDLE` state to complete before loading the test sequence into memory.
+3. Waits for the system to enter the `WAIT` state (en_WAIT).
 4. Replays the player’s input sequence as a series of button presses.
-5. Waits for completion signals (complete_WAIT, complete_CHECK).
+5. Waits for completion signals (`complete_WAIT`, `complete_CHECK`).
 6. Compares the result of the sequence check against the expected outcome.
 
 Success criteria:
 
-- The system completes the WAIT and CHECK states for each test vector.
-- The sequences_match flag correctly reflects whether the player’s sequence matches the stored sequence.
+- The system completes the `WAIT` and `CHECK` states for each test vector.
+- The `sequences_match` flag correctly reflects whether the player’s sequence matches the stored sequence.
 - The observed PASS/FAIL result matches the expected outcome from the CSV vector.
 
 Failure criteria:
@@ -117,17 +127,22 @@ Failure criteria:
 - Timeout or failure to assert critical handshake signals within the timeout window.
 - Mismatch between expected and actual pass/fail results for any test vector.
 
-CSV Contents:<br>
+CSV Contents:
+
 ![](./csv.png)<br>
+
+
 | Seed | User Input | Expected Result |
 
 Results:
+
 ![](./test_simon.png)<br>
+
 
 ### Gameplay Functionality
 
 - Simulate a win by entering the correct sequence.
-- Simulate a mistake during the round. Game should detect incorrect input in `CHECK` and set the game_complete signal to 0, indicating a loss.
+- Simulate a mistake during the round. Game should detect incorrect input in `CHECK` and set the `game_complete` signal to 0, indicating a loss.
 
 ### Game State Transitions
 
@@ -136,7 +151,7 @@ Results:
 - Confirm each state's role:
   - `DISPLAY`: Colour is displayed long enough (500ms) for users to understand and colour sequence is consistent between rounds.
   - `WAIT`: State ends only when all required colours are entered. (ex. in the 14-colour sequence, must wait until 14 colours are entered).
-  - `CHECK`: Correct validation. (if the user enters a correct sequence, it should end the game and set game_complete to 1, indicating a win.)
+  - `CHECK`: Correct validation. (if the user enters a correct sequence, it should end the game and set `game_complete` to 1, indicating a win.)
 
 ### Startup & Seeding
 
