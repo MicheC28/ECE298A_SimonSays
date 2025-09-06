@@ -89,20 +89,19 @@ STATES:
 
 IDLE:
 
-![](./Timing%20Diagram%20-%20States/idle.png)<br>
+![](./Timing_Diagram_States/idle.png)<br>
 
 DISPLAY:
 
-![](./Timing%20Diagram%20-%20States/display_state.png)<br>
+![](./Timing_Diagram_States/display_state.png)<br>
 
 WAIT:
 
-![](./Timing%20Diagram%20-%20States/wait_state.png)<br>
+![](./Timing_Diagram_States/wait_state.png)<br>
 
 CHECK:
 
-![](./Timing%20Diagram%20-%20States/check.png)<br>
-
+![](./Timing_Diagram_States/check.png)<br>
 
 ## How to test
 
@@ -134,13 +133,11 @@ CSV Contents:
 
 ![](./csv.png)<br>
 
-
 | Seed | User Input | Expected Result |
 
 Results:
 
 ![](./test_simon.png)<br>
-
 
 ### Gameplay Functionality
 
